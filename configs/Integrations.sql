@@ -41,6 +41,6 @@ USE SCHEMA INTEG_RATIONS;
 CREATE OR REPLACE API INTEGRATION git_api_int
     API_PROVIDER = git_https_api
     API_ALLOWED_PREFIXES = ('https://github.com/ZACKHADD/Snowflake_Tasty_Bytes.git')
-    ALLOWED_AUTHENTICATION_SECRETS = (api_git_snow_secret)
+    -- ALLOWED_AUTHENTICATION_SECRETS = (api_git_snow_secret)
     ENABLED = TRUE;
 
