@@ -89,7 +89,7 @@ USE ROLE SECURITYADMIN;
 
 CREATE ROLE IF NOT EXISTS TASTY_ADMIN
     COMMENT = 'role of admin of tasty scope';
-CREATE ROLE IF NOT EXISTS Data_Engineer
+CREATE ROLE IF NOT EXISTS DATA_ENGINEER
     COMMENT = 'role of data engineer of tasty scope';
 CREATE ROLE IF NOT EXISTS Data_Analyst
     COMMENT = 'role of data analyst of tasty scope';
@@ -98,9 +98,13 @@ CREATE ROLE IF NOT EXISTS Data_Analyst
 
 GRANT ROLE TASTY_ADMIN TO ROLE SYSADMIN;
 
-GRANT ROLE Data_Engineer TO ROLE TASTY_ADMIN;   
+GRANT ROLE DATA_ENGINEER TO ROLE TASTY_ADMIN;   
 
 GRANT ROLE Data_Analyst TO ROLE TASTY_ADMIN;  
+
+
+-- Note that when we create a role in snowflake, by defautl it cannot do anything unless we explicitly grant it with preveliges !!  
+
 
 /**************************************************************************
                     Grants and previleges
@@ -202,7 +206,11 @@ Grants in Snowflake
 
     ├── Function / Procedure
     │   ├── USAGE
+    │   ├── CALLER
     │   ├── OWNERSHIP
+    │   └── Note: EXECUTE context can be:
+    │          - EXECUTE AS CALLER (requires CALLER privilege)
+    │          - EXECUTE AS OWNER (requires no extra privilege)
 
     ├── Masking Policy
     │   ├── APPLY
@@ -251,7 +259,7 @@ GRANT CREATE WAREHOUSE ON ACCOUNT TO ROLE TASTY_ADMIN;
 
 USE ROLE SECURITYADMIN;
 
-GRANT ALL ON DATABASE TASTY_BYTES TO ROLE TASTY_ADMIN;
+GRANT OWNERSHIP ON DATABASE TASTY_BYTES TO ROLE TASTY_ADMIN;
 
 SHOW GRANTS TO ROLE TASTY_ADMIN;
 
@@ -259,8 +267,31 @@ SHOW GRANTS TO ROLE TASTY_ADMIN;
 -- The data engineer role must have access to the snowflake database to monitor query history, jobs , users and so on !
 -- The tasty_admin will inherit that since data engineer role is attached to the tasty admin !
 
-GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE TO ROLE Data_Engineer; -- Since Snowflake is external database shared by snowflake !
+GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE TO ROLE DATA_ENGINEER; -- Since Snowflake is external database shared by snowflake !
 
-GRANT USAGE ON WAREHOUSE DE_WH TO ROLE Data_Engineer;
 
-SHOW GRANTS TO ROLE Data_Engineer;
+-- Let's grant the DATA_ENGINEER preveliges to use the database and its objects !
+GRANT USAGE ON DATABASE TASTY_BYTES TO ROLE DATA_ENGINEER;
+GRANT ALL ON ALL SCHEMAS IN DATABASE TASTY_BYTES TO ROLE DATA_ENGINEER;
+
+-- Future Grants to role DATA_ENGINEER !
+GRANT ALL ON FUTURE SCHEMAS IN DATABASE TASTY_BYTES TO ROLE DATA_ENGINEER;
+
+-- Since all the objects will be created by the data engineer the only objects the admin need to grant previleges on to data engineer 
+-- are masking polices, tags and row policies !
+/* Example would be : 
+        GRANT APPLY ON MASKING POLICY my_db.my_schema.mask_email TO ROLE data_engineer"
+ */
+
+-- Let's grant the DATA_ENGINEER preveliges to use the warehouse !
+
+GRANT ALL ON WAREHOUSE DE_WH TO ROLE DATA_ENGINEER;
+
+
+-- Now the data engineer can start creating tables and populate them !
+
+-- To check the previleges, Run the two following queries as single block !
+SHOW GRANTS TO ROLE DATA_ENGINEER;
+SELECT *
+FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
+WHERE "grantee_name" = 'DATA_ENGINEER' AND "granted_on" = 'SCHEMA';
