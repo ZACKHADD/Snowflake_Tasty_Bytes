@@ -1,4 +1,4 @@
--- Create the schema that will hold the integrations
+{# -- Create the schema that will hold the integrations
 USE ROLE TASTY_ADMIN;
 USE DATABASE TASTY_BYTES;
 CREATE OR REPLACE INTEG_RATIONS;
@@ -44,3 +44,4 @@ CREATE OR REPLACE API INTEGRATION git_api_int
     -- ALLOWED_AUTHENTICATION_SECRETS = (api_git_snow_secret)
     ENABLED = TRUE;
 
+ #}
