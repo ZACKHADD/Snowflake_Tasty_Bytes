@@ -55,8 +55,9 @@ CREATE STORAGE INTEGRATION tasty_files
 -- Create the file format to read files in the storages
 
 CREATE OR REPLACE FILE FORMAT s3_ff_tasty
-TYPE = 'CSV'
-PARSE_HEADER = TRUE;
+  TYPE = 'CSV'
+  FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+  ;
 
 /* Create the external stage : for public ones we just provide the link with no credentials */
 

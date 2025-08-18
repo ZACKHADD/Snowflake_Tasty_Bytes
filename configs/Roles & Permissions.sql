@@ -278,10 +278,14 @@ GRANT ALL ON ALL SCHEMAS IN DATABASE TASTY_BYTES TO ROLE DATA_ENGINEER;
 GRANT ALL ON FUTURE SCHEMAS IN DATABASE TASTY_BYTES TO ROLE DATA_ENGINEER;
 
 -- Since all the objects will be created by the data engineer the only objects the admin need to grant previleges on to data engineer 
--- are masking polices, tags and row policies !
+-- are masking polices, tags and row policies, file formats .. !
 /* Example would be : 
         GRANT APPLY ON MASKING POLICY my_db.my_schema.mask_email TO ROLE data_engineer"
  */
+
+GRANT USAGE ON STAGE S3_TASTY_FILES TO ROLE DATA_ENGINEER;
+
+GRANT USAGE ON FILE FORMAT S3_FF_TASTY TO ROLE DATA_ENGINEER;
 
 -- Let's grant the DATA_ENGINEER preveliges to use the warehouse !
 
@@ -294,4 +298,4 @@ GRANT ALL ON WAREHOUSE DE_WH TO ROLE DATA_ENGINEER;
 SHOW GRANTS TO ROLE DATA_ENGINEER;
 SELECT *
 FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
-WHERE "grantee_name" = 'DATA_ENGINEER' AND "granted_on" = 'SCHEMA';
+WHERE "grantee_name" = 'DATA_ENGINEER' AND "granted_on" = 'F';
